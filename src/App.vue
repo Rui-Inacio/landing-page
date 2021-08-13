@@ -12,7 +12,7 @@ export default {
 
   name: 'App',
   components: {
-    Todo : () => import('./components/Todo')
+    Todo : () => import('./components/TodoList/Todo')
   }
 }
 
