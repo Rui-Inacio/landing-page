@@ -1,16 +1,19 @@
 <template>
+
+  <!-- TODO Finish auto save for notes -->
+
   <div class="container is-round">
     <div class="box">
       <div>
-        <b-button icon-left="note-multiple" @click="toggle"> Notes </b-button>
+        <b-button @click="openNotes"> Notes </b-button>
         <div class="is-pulled-right">
           <form action="#" @keypress.enter.prevent="createNote">
             <b-field grouped>
               <b-input
-                placeholder="New Note Group"
-                v-model="noteGroup.title"
+                placeholder="New Note"
+                v-model="note.title"
               ></b-input>
-              <b-button>Create</b-button>
+              <b-button @click="createNote">Create</b-button>
             </b-field>
           </form>
         </div>
@@ -18,19 +21,56 @@
 
       <div v-if="isOpen">
         <hr />
-        <b-tabs type="is-boxed">
+        <b-tabs @input="changeActiveNote(activeTab)" type="is-boxed" v-model="activeTab">
           <b-tab-item
-            v-for="(notes, notes_index) in noteGroups"
-            :label="notes.title"
-            :icon="notes.icon"
-            :key="notes_index"
+            v-for="(note, note_index) in noteList"
+            :label="note.title"
+            :icon="note.icon"
+            :key="note_index"
           >
-            <div id="editor">
-              <ckeditor></ckeditor>
+            
+            <div class="box">
+              <div v-if="note.title !== 'Notes'">
+                <div class="is-flex is-align-items-center">
+
+                  <div id="groupField">
+                    <b-field grouped label-position="on-border" label="Note Title">
+                      <b-input :disabled="!isEditing" maxlength="30" v-model="noteTitle"></b-input>
+                    </b-field>
+                  </div>
+
+                  <div v-if="!isEditing">
+                    <b-button @click="isEditing ? isEditing = false : isEditing = true" class="ml-3 borderless">
+                      <b-icon icon="pencil-outline"></b-icon>
+                    </b-button>
+                    <b-button @click="deleteNote(note_index)" class="ml-3 borderless">
+                      <b-icon icon="delete-outline"></b-icon>
+                    </b-button>
+                  </div>
+
+                  <div v-else>
+                    <b-button @click="editNote(note_index)" class="ml-3 borderless">
+                      <b-icon icon="check"></b-icon>
+                    </b-button>
+                    <b-button @click="isEditing = false" class="ml-3 borderless">
+                      <b-icon icon="close"></b-icon>
+                    </b-button>
+                  </div>
+                  
+                </div>
+                <hr>
+              </div> 
+
+              <div id="editor" class="block">
+                <ckeditor @newData="noteBodyChanged" :editorData="note.body"></ckeditor>
+                {{note.body}}
+              </div>  
             </div>
+
           </b-tab-item>
         </b-tabs>
       </div>
+      
     </div>
   </div>
 </template>
@@ -46,62 +86,123 @@ export default {
 
   data() {
     return {
-      isOpen: false,
 
-      noteGroup: {
+      isOpen: false,
+      isEditing: false,
+      noteTitle: '',
+
+      note: {
         title: "",
         icon: "",
         body: "",
       },
 
-      noteGroups: [],
+      noteList: [],
+      activeTab: 0,
+      activeNote: {},
+
     };
   },
 
   methods: {
-    toggle() {
-      if (this.isOpen) {
-        this.isOpen = false;
-      } else {
-        this.isOpen = true;
+
+    openNotes() {
+      
+      if(this.isOpen){
+        this.isOpen = false
+      }else{
+        this.isOpen = true
       }
+
+    },
+
+    editNote (note_index) {
+
+      let title = this.noteTitle
+      let note = this.noteList[note_index]
+      note.title = title
+      this.saveState()
+      this.isEditing = false
+
+    },
+
+    deleteNote (note_index) {
+
+      this.noteList.splice(note_index, 1)
+      this.activeNote--
+      this.saveState()
+
     },
 
     createNote () {
 
-			let noteGroup = {
-				title: this.noteGroup.title,
+			let note = {
+				title: this.note.title,
 				icon: '',
 				body: ''
 			}
 
-			this.noteGroup.title = ''
-			this.noteGroups.push(noteGroup)
+			this.note.title = ''
+			this.noteList.push(note)
+      this.saveState()
 
 		},
+
+    changeActiveNote (index) {
+      this.activeNote = this.noteList[index]
+      this.noteTitle = this.activeNote.title
+    },
+
+    noteBodyChanged (data) {
+      
+      this.activeNote.body = data
+      let openNote = this.noteList.find(note => {
+        return note.title === this.activeNote.title
+      })
+      
+      openNote.body = data
+      console.log(this.noteList);
+      this.saveState()
+
+    },
+
+    saveState () {
+      let stateJson = JSON.stringify(this.noteList)
+      console.log("statetJson", stateJson);
+      window.localStorage.setItem('notes-component', stateJson)
+    },
+
+    loadState () {
+      let stateJson =  window.localStorage.getItem('notes-component')
+      this.noteList = JSON.parse(stateJson)
+      console.log("loadedState", this.noteList);
+    },
+
   },
 
   created() {
-    if (!this.noteGroups.length) {
-      let newGroup = {
+
+    this.loadState()
+
+    if (!this.noteList || !this.noteList.length) {
+      let newNote = {
         title: "Notes",
         icon: null,
         body: "",
       };
 
-      this.noteGroups.push(newGroup);
+      this.noteList.push(newNote);
+
     }
+
+    this.activeNote = this.noteList[0]
+    
   },
 };
 </script>
 
 <style>
-.roundButton {
-  display: block;
-  height: 75px;
-  width: 75px;
-  border-radius: 50%;
-  border: 1px solid wheat;
-  background-color: whitesmoke;
-}
+  .borderless {
+    border: transparent;
+  }
 </style>
