@@ -1,7 +1,8 @@
 <template>
   <div>
 
-    <Todo></Todo>
+    <!-- <Todo></Todo> -->
+    <ImageClipboard></ImageClipboard>  
 
   </div>
 </template>
@@ -12,7 +13,8 @@ export default {
 
   name: 'App',
   components: {
-    Todo : () => import('./components/Todo')
+    // Todo : () => import('./components/Todo'),
+    ImageClipboard: () => import('./components/ImageClipboard'),
   }
 }
 
