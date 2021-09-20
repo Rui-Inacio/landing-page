@@ -1,10 +1,7 @@
 <template>
-  <div>
+  <div class="container">
     <div class="imageInput" id="imageDiv" contenteditable="true" @keypress.enter.prevent="downloadImages" @paste="onPaste"></div>
     <b-button class="primary" @click="downloadImages">Download</b-button>
-    <!-- <div v-if="images.length">
-      <img v-for="image in images" :key="image" :src="image" alt="snippet">
-    </div> -->
   </div>
 </template>
 
@@ -13,6 +10,7 @@ export default {
   data() {
     return {
       images: [],
+      imageNodes: [],
     };
   },
 
@@ -22,6 +20,7 @@ export default {
 
       var imageInDiv = document.getElementById('imageDiv');
       var images = imageInDiv.getElementsByTagName('img');
+      this.imageNodes = images;
 
       this.sleep(10).then( () => {
         this.images = [];
@@ -41,6 +40,8 @@ export default {
 
       if(this.images.length > 0){
 
+        // TODO: Check if image src is the same, if so use same name or only download once
+
         var a = document.createElement('a');
         this.images.forEach(image => {
 
@@ -51,6 +52,10 @@ export default {
           a.click();
           document.body.removeChild(a);
 
+        })
+
+        this.imageNodes.forEach(image => {
+          image.remove();
         })
 
       }
