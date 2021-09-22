@@ -1,7 +1,8 @@
 <template>
   <div>
 
-    <Todo></Todo>
+    <!-- <Todo></Todo> -->
+    <Schedule></Schedule>
 
   </div>
 </template>
@@ -12,7 +13,8 @@ export default {
 
   name: 'App',
   components: {
-    Todo : () => import('./components/Todo')
+    Schedule: () => import('./components/Schedule.vue')
+    // Todo : () => import('./components/Todo')
   }
 }
 
