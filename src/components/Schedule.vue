@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Edit time of event -->
   <div class="container">
     <b-datepicker
       class="box"
@@ -19,18 +20,20 @@
         </b-switch>
       </b-field>
 
-      <b-field grouped>
-        <b-input expanded v-model="event.description"></b-input>
-        <b-button @click="createEvent(event)" icon-left="calendar-plus">
-          Add Event
-        </b-button>
-      </b-field>
+      <form action="#" @submit.prevent="createEvent(event)">
+        <b-field grouped>
+          <b-input expanded v-model="event.description"></b-input>
+          <b-button @click="createEvent(event)" icon-left="calendar-plus" :disabled="!event.description">
+            Add Event
+          </b-button>
+        </b-field>
+      </form>
         
-      <div class="card mb-5" v-for="event in shownEvents" :key="event.description">
+      <div class="card mb-5" v-for="(event, index) in shownEvents" :key="index">
         <div class="card-header">
           <h3 class="is-size-5">{{event.time}}</h3>
           <div class="buttons is-pulled-right">
-            <b-button rounded size="is-small">
+            <b-button @click="cancelEdit(event, index)" rounded size="is-small">
               <b-icon icon="pencil"></b-icon>
             </b-button>
             <b-button @click="deleteEvent(event)" rounded size="is-small">
@@ -38,9 +41,32 @@
             </b-button>
           </div>
         </div>
+
         <div class="card-content">
-          {{ event.description }}
+          <div v-if="editingEvent != index">
+            {{ event.description }}
+          </div>
+          <div v-if="editingEvent == index">
+            <form action="#" @submit.prevent="updateEvent(event)">
+              <b-field grouped>
+                <b-timepicker v-if="turnedSwitch == 'Custom Time'" size="is-small" v-model="event.time" inline></b-timepicker>
+                <b-switch v-model="turnedSwitch" true-value="All Day" false-value="Custom Time">
+                  {{ turnedSwitch }}
+                </b-switch>
+              </b-field>
+              <b-field group-multiline>
+                <b-input v-model="event.description"></b-input>
+                <b-button icon-left="check" class="is-success" @click="updateEvent(event)">
+                  Save
+                </b-button>
+                <b-button @click="cancelEdit(event, index, true)" icon-left="close" class="is-danger">
+                  Cancel
+                </b-button>
+              </b-field>
+            </form>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -62,8 +88,9 @@ export default {
         color: null,
         icon: null,
       },
+      eventToEdit: null,
       turnedSwitch: "All Day",
-      
+      editingEvent: null
     };
   },
 
@@ -78,8 +105,6 @@ export default {
       let events = this.getEvents(day, month);
       this.shownEvents = events;
     },
-
-    
 
     getEvents(day, month) {
       let events = [];
@@ -98,6 +123,10 @@ export default {
     },
 
     createEvent() {
+
+      if(!this.event.description){
+        return;
+      }
 
       let month = this.event.date.getMonth();
       let day = this.event.date.getDate();
@@ -131,7 +160,11 @@ export default {
       };
     },
 
-    editEvent(event) {
+    updateEvent(event) {
+
+      if(!event.description){
+        return;
+      }
 
       let date = event.date;
       let day = date.getDate();
@@ -140,6 +173,7 @@ export default {
       let events = this.getEvents(day, month);
       let eventToEdit = events.find(element => element == event);
       eventToEdit = event;
+      this.editingEvent = null;
       return eventToEdit;
 
     },
@@ -153,6 +187,29 @@ export default {
       let events = this.getEvents(day, month);
       let index = events.findIndex(element => element == event);
       events.splice(index, 1);
+
+      index = this.allEvents.findIndex(element => element == event);
+      this.allEvents.splice(index, 1);
+
+    },
+
+    cancelEdit(event, index, cancel = false){
+
+
+
+      if(cancel == false){
+        this.eventToEdit = Object.assign({}, event);
+      }
+
+      if(this.editingEvent == index){
+        this.editingEvent = null;
+      }else{
+        this.editingEvent = index;
+      }
+
+      console.log("Start");
+      console.log("Index = ", index);
+      this.shownEvents[index] = Object.assign({}, this.eventToEdit);
 
     }
 
@@ -174,4 +231,9 @@ export default {
 </script>
 
 <style>
+
+  input:invalid {
+    box-shadow: none;
+  }
+
 </style>
