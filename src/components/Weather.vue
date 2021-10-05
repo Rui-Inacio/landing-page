@@ -94,7 +94,7 @@ export default {
         params: {radius: '10', locationId: locationId},
         headers: {
           'x-rapidapi-host': 'wft-geo-db.p.rapidapi.com',
-          'x-rapidapi-key': 'cfc515e0f2mshcad70df59555ebbp158d90jsn0884d2b7f224'
+          'x-rapidapi-key': 'process.env.RAPID_API_KEY'
         }
       };
 
@@ -110,7 +110,7 @@ export default {
       let params = {
         lat: city.latitude,
         lon: city.longitude,
-        appid: '42b2795eb92e8909fff2092e5a69006f',
+        appid: 'process.env.WEATHER_API_KEY',
         units: this.temperature.units
       }
 
