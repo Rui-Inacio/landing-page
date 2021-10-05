@@ -1,6 +1,7 @@
 <template>
   <div>
 
+    <Notes></Notes> 
     <Todo></Todo>
 
   </div>
@@ -14,6 +15,7 @@ export default {
 
   name: 'App',
   components: {
+    Notes: () => import('./components/Notes.vue')
     Todo : () => import('./components/TodoList/Todo')
   }
 }
