@@ -1,20 +1,24 @@
 <template>
   <div>
 
-    <!-- <Todo></Todo> -->
     <Schedule></Schedule>
+    <Notes></Notes> 
+    <Todo></Todo>
 
   </div>
 </template>
 
 <script>
 
+require('dotenv').config()
+
 export default {
 
   name: 'App',
   components: {
     Schedule: () => import('./components/Schedule.vue')
-    // Todo : () => import('./components/Todo')
+    Notes: () => import('./components/Notes.vue')
+    Todo : () => import('./components/TodoList/Todo')
   }
 }
 
