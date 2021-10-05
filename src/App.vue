@@ -2,19 +2,21 @@
   <div>
 
     <Notes></Notes> 
-    <!-- <Todo></Todo> -->
+    <Todo></Todo>
 
   </div>
 </template>
 
 <script>
 
+require('dotenv').config()
+
 export default {
 
   name: 'App',
   components: {
-    // Todo : () => import('./components/Todo'),
     Notes: () => import('./components/Notes.vue')
+    Todo : () => import('./components/TodoList/Todo')
   }
 }
 
