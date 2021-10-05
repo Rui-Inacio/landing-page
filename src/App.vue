@@ -1,6 +1,8 @@
 <template>
   <div>
 
+    <Schedule></Schedule>
+    <Notes></Notes> 
     <Todo></Todo>
 
   </div>
@@ -8,11 +10,15 @@
 
 <script>
 
+require('dotenv').config()
+
 export default {
 
   name: 'App',
   components: {
-    Todo : () => import('./components/Todo')
+    Schedule: () => import('./components/Schedule.vue')
+    Notes: () => import('./components/Notes.vue')
+    Todo : () => import('./components/TodoList/Todo')
   }
 }
 
