@@ -8,6 +8,8 @@
 
 <script>
 
+require('dotenv').config()
+
 export default {
 
   name: 'App',
