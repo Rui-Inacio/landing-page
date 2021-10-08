@@ -1,20 +1,26 @@
 <template>
   <div>
 
-    <!-- <Todo></Todo> -->
     <ImageClipboard></ImageClipboard>  
+    <Schedule></Schedule>
+    <Notes></Notes> 
+    <Todo></Todo>
 
   </div>
 </template>
 
 <script>
 
+require('dotenv').config()
+
 export default {
 
   name: 'App',
   components: {
-    // Todo : () => import('./components/Todo'),
     ImageClipboard: () => import('./components/ImageClipboard'),
+    Schedule: () => import('./components/Schedule.vue')
+    Notes: () => import('./components/Notes.vue')
+    Todo : () => import('./components/TodoList/Todo')
   }
 }
 
