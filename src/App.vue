@@ -1,6 +1,7 @@
 <template>
   <div>
 
+    <ImageClipboard></ImageClipboard>  
     <Schedule></Schedule>
     <Notes></Notes> 
     <Todo></Todo>
@@ -16,6 +17,7 @@ export default {
 
   name: 'App',
   components: {
+    ImageClipboard: () => import('./components/ImageClipboard'),
     Schedule: () => import('./components/Schedule.vue')
     Notes: () => import('./components/Notes.vue')
     Todo : () => import('./components/TodoList/Todo')
