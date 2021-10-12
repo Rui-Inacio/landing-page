@@ -1,26 +1,26 @@
 <template>
   <div>
 
-    <ImageClipboard></ImageClipboard>  
-    <Schedule></Schedule>
-    <Notes></Notes> 
-    <Todo></Todo>
+    <Notes></Notes>
 
   </div>
 </template>
 
 <script>
 
-require('dotenv').config()
-
 export default {
 
   name: 'App',
   components: {
-    ImageClipboard: () => import('./components/ImageClipboard'),
-    Schedule: () => import('./components/Schedule.vue')
-    Notes: () => import('./components/Notes.vue')
-    Todo : () => import('./components/TodoList/Todo')
+    // ImageClipboard: () => import('./components/ImageClipboard'),
+    // Schedule: () => import('./components/Schedule.vue'),
+    Notes: () => import('./components/Notes.vue'),
+    // Todo : () => import('./components/TodoList/Todo'),
+    // Weather: () => import('./components/Weather.vue')
+  },
+
+  created () {
+    console.log("process", process.env);
   }
 }
 

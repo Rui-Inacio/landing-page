@@ -1,40 +1,44 @@
 <template>
   <div id="app">
     <ckeditor
-      :ckeditor="editor"
+      :editor="editor"
       v-model="editorData"
       :config="editorConfig"
+      @input="logData"
     ></ckeditor>
   </div>
 </template>
 
 <script>
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export default {
+
+  props: {
+    editorInput: {
+      default: "",
+      type: String
+    },
+  },
 
   data() {
     return {
       editor: ClassicEditor,
-			editorData: null,
+      editorData: "",
       editorConfig: {}
     };
   },
 
-  watch: {
-    editorData(newValue, oldValue) {
-      if (oldValue !== newValue) {
-        this.$emit("newData", newValue);
-      }
-    },
+  methods: {
+    logData(){
+      this.$emit("newData", this.editorData);
+    }
   },
 
-	created () {
+  created() {
+    this.editorData = this.editorInput;
+  }
 
-		console.log(this.editorData);
-    this.editorData = this.editorInput
-
-	},
 };
 </script>
 

@@ -16,8 +16,8 @@
             <h6 class="is-size-6">{{weather.weather[0].description}}</h6>
           </div>
           <div>
-            <h5 class="is-size-5">Humidity: {{weather.humidity}}%</h5>
-            <h5 class="is-size-5">Precipitation: {{weather.pop * 100}}%</h5>
+            <h5 class="is-size-5">Humidity: {{Math.round(weather.humidity)}}%</h5>
+            <h5 class="is-size-5">Precipitation: {{Math.round(weather.pop * 100)}}%</h5>
           </div>
         </div>
 				<span class="is-pulled-right mb-3" style="opacity:25%">

@@ -81,6 +81,8 @@ export default {
 
       }).catch(error => {
         console.error(error);
+        this.errorOnLocation = true;
+        this.successOnLocation = false;
       })
 
     },
@@ -94,7 +96,7 @@ export default {
         params: {radius: '10', locationId: locationId},
         headers: {
           'x-rapidapi-host': 'wft-geo-db.p.rapidapi.com',
-          'x-rapidapi-key': 'process.env.RAPID_API_KEY'
+          'x-rapidapi-key': 'cfc515e0f2mshcad70df59555ebbp158d90jsn0884d2b7f224'
         }
       };
 
@@ -110,7 +112,7 @@ export default {
       let params = {
         lat: city.latitude,
         lon: city.longitude,
-        appid: 'process.env.WEATHER_API_KEY',
+        appid: '42b2795eb92e8909fff2092e5a69006f',
         units: this.temperature.units
       }
 
