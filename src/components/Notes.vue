@@ -8,7 +8,7 @@
         <div class="is-pulled-right">
           <form action="#" @keypress.enter.prevent="createNote">
             <b-field grouped>
-              <b-input placeholder="New Note" v-model="newNote.title"></b-input>
+              <b-input :placeholder="`New Note                 ${noteList.length} / 5`" v-model="newNote.title"></b-input>
               <b-button :disabled="!newNote.title" @click="createNote">Create</b-button>
             </b-field>
           </form>
@@ -39,7 +39,7 @@
 
                     <div v-if="!isEditing">
                       <b-button
-                        @click="isEditing ? (isEditing = false) : (isEditing = true)"
+                        @click="toggleEdit(note)"
                         class="ml-3 borderless"
                       >
                         <b-icon icon="pencil-outline"></b-icon>
@@ -53,11 +53,11 @@
                     </div>
 
                     <div v-else>
-                      <b-button @click="editNote()" class="ml-3 borderless">
+                      <b-button :disabled="!note.title" @click="updateNote(note)" class="ml-3 borderless">
                         <b-icon icon="check"></b-icon>
                       </b-button>
                       <b-button
-                        @click="isEditing = false"
+                        @click="toggleEdit(note)"
                         class="ml-3 borderless"
                       >
                         <b-icon icon="close"></b-icon>
@@ -104,11 +104,18 @@ export default {
       activeNote: {},
       noteList: [],
       activeTab: 0,
+
+      editingTitle: '',
+
     };
   },
 
   methods: {
     createNote() {
+
+      if(this.noteList.length == 5){
+        return;
+      }
 
       if(!this.newNote.title || this.newNote.title.trim() == ""){
         return;
@@ -125,7 +132,20 @@ export default {
       this.saveState();
     },
 
-    editNote() {
+    toggleEdit(note){
+      if(!this.isEditing){
+        this.editingTitle = note.title;
+        this.isEditing = true;
+      }else{
+        note.title = this.editingTitle;
+        this.isEditing = false;
+      }
+    },
+
+    updateNote(note) {
+      if(!note.title || !note.title.length || note.title.trim() == ""){
+        return;
+      }
       this.saveState();
       this.isEditing = false;
     },
