@@ -243,9 +243,7 @@ export default {
     this.shownEvents = todayEvents;
 
     this.eventsByMonth.forEach(key => {
-      console.log("Key => ", key );
       key.forEach(innerKey => {
-        console.log("Inner Key => ", innerKey);
         innerKey.forEach(elem => {
           console.log(elem);
           elem.date = new Date(elem.date);
