@@ -4,7 +4,7 @@
 
       <div class="is-flex is-justify-content-center is-align-items-center">
 
-        <b-dropdown expanded :triggers="['hover']" aria-role="list">
+        <b-dropdown expanded :triggers="['click']" aria-role="list">
 
           <template #trigger>
             <b-button icon-right="chevron-down" expanded type="is-primary">
@@ -31,8 +31,10 @@
 
           <b-dropdown-item focusable custom>
             <b-field grouped>
-              <b-input icon-left="plus" v-model="group.name" @keypress.enter="createGroup" placeholder="New Group Name">New Group Name</b-input>
-              <b-button class="is-primary" @click="createGroup" :disabled="!group.name">Create Group</b-button>
+              <form action="#" @submit.prevent="createGroup">
+                <b-input icon-left="plus" v-model="group.name" @keypress.enter="createGroup" placeholder="New Group Name">New Group Name</b-input>
+              </form>
+              <b-button class="is-primary ml-3" @click="createGroup" :disabled="!group.name">Create Group</b-button>
             </b-field>
           </b-dropdown-item>
 
@@ -56,7 +58,7 @@
         >
           <ul>
             <li class="is-flex is-justify-content-space-around">
-              <b-checkbox v-if="!item.deleted && !item.completed && !item.archived" v-model="item.completed" @input="completeTodo(item)"></b-checkbox>
+              <b-checkbox v-if="!item.deleted && !item.archived" v-model="item.completed" @input="completeTodo(item)"></b-checkbox>
               <span>
                 <s v-if="item.completed">{{ item.text }}</s>
                 <span v-else>{{ item.text }}</span>
@@ -139,6 +141,9 @@ export default {
         activeGroup: "",
         groupList: [],
       },
+
+      todoMap: null,
+
     };
   },
 
@@ -155,7 +160,7 @@ export default {
 
 		async getSavedState () {
 
-			let json = await window.localStorage.getItem('todo-state')
+			let json = window.localStorage.getItem('todo-state')
 			let state = await JSON.parse(json)
 			if(state){
 				this.state = state
@@ -169,8 +174,13 @@ export default {
     createGroup () {
 
       let groupName = this.group.name
-      let newGroup = new Group(groupName)
 
+      if(this.todoMap.has(groupName)){
+        return;
+      }
+
+      let newGroup = new Group(groupName)
+      this.todoMap.set(groupName, newGroup);
       this.groupList.push(newGroup);
 			this.saveState()
       this.group.name = ''
@@ -178,9 +188,10 @@ export default {
     },
 
     deleteGroup (group_index) {
-
+      
+      this.todoMap.delete(this.groupList[group_index].name);
       this.groupList.splice(group_index, 1);
-			this.saveState()
+			this.saveState();
 
     },
 
@@ -198,11 +209,7 @@ export default {
         newTodo.start = Date.now();
         newTodo.group = group.name
 
-        let groupIndex = this.groupList.findIndex((item) => {
-          return item.name === group.name;
-        });
-
-        this.groupList[groupIndex].todoList.push(newTodo);
+        this.todoMap.get(group.name).todoList.push(newTodo);
         this.todo = new Todo("");
 				this.saveState()
       }
@@ -211,15 +218,18 @@ export default {
 
     completeTodo (todo) {
 
-      todo.completed = true;
-      todo.end = Date.now();
-      let newTodo = new Todo("");
-      newTodo = todo
-      let completedGroup = this.groupList.find(group => {
-        return group.name === 'Completed'
-      })
+      let completedGroup = this.todoMap.get('Completed');
 
-      completedGroup.todoList.unshift(newTodo)
+      if(todo.completed){
+        todo.end = Date.now();
+        const newTodo = todo
+        completedGroup.todoList.unshift(newTodo);
+      }else{
+        todo.end = null;
+        let index = completedGroup.todoList.findIndex(elem => {elem == todo});
+        completedGroup.todoList.splice(index, 1);
+      }
+
 			this.saveState()
 
     },
@@ -228,13 +238,8 @@ export default {
 
       todo.archived = true;
       group.todoList.splice(todo_index, 1);
-      let archiveGroup = this.groupList.find((item) => {
-        return item.name === "Archived";
-      });
-
-      if (archiveGroup) {
-        archiveGroup.todoList.push(todo);
-      }
+      let archiveGroup = this.todoMap.get('Archived');
+      archiveGroup.todoList.push(todo);
 
 			this.saveState()
 
@@ -244,9 +249,7 @@ export default {
 
       todo.archived = false
       group.todoList.splice(todo_index, 1)
-      let todoGroup = this.groupList.find(gotoGroup => {
-        return gotoGroup.name === todo.group
-      })
+      let todoGroup = this.todoMap.get(todo.group);
       todoGroup.todoList.push(todo)
 
     },
@@ -254,16 +257,14 @@ export default {
     deleteTodo (todo, todo_index, group) {
 
       if(todo.deleted){
-        group.splice(todo_index, 1)
+        group.todoList.splice(todo_index, 1)
         return
       }
 
       todo.deleted = true
       todo.deletionDate = Date.now()
       group.todoList.splice(todo_index, 1);
-      let deletedGroup = this.groupList.find(group => {
-        return group.name === 'Deleted'
-      })
+      let deletedGroup = this.todoMap.get('Deleted');
       deletedGroup.todoList.unshift(todo)
 			this.saveState()
 
@@ -271,14 +272,11 @@ export default {
 
     recoverTodo (todo, todo_index, group) {
 
-      todo.delete = false
+      todo.deleted = false
       todo.deletionDate = null
       group.todoList.splice(todo_index, 1)
 
-      let todoGroup = this.groupList.find(item => {
-        return item.name === todo.group
-      })
-
+      let todoGroup = this.todoMap.get(todo.group)
       todoGroup.todoList.unshift(todo)
 
     }
@@ -288,7 +286,10 @@ export default {
 
     this.activeGroup = new Group('')
 
-		// await this.getSavedState()    
+    if(!this.todoMap){
+      this.todoMap = new Map();
+    }
+		// await this.getSavedState()
 
     if (!this.groupList.length) {
       let archived = new Group("Archived");
@@ -301,11 +302,17 @@ export default {
       archived.icon = 'archive'
       deleted.icon = 'delete'
 
+      this.todoMap.set('Todo', todo);
+      this.todoMap.set('Completed', completed);
+      this.todoMap.set('Archived', archived);
+      this.todoMap.set('Deleted', deleted);
+
       this.activeGroup = todo;
       this.groupList.push(todo);
       this.groupList.push(completed)
       this.groupList.push(archived);
       this.groupList.push(deleted);
+
     }
 
   },
