@@ -73,6 +73,10 @@
 </template>
 
 <script>
+
+import {saveState, loadState} from '../utils/localStorage';
+import {replacer, reviver} from '../utils/jsonStringify';
+
 export default {
   data() {
     return {
@@ -151,6 +155,11 @@ export default {
       this.shownEvents = dailyEvents;
       this.allEvents.push(newEvent);
 
+      console.info("Events by month", this.eventsByMonth);
+      console.log(JSON.stringify(this.eventsByMonth));
+
+      saveState('schedule', JSON.stringify(this.eventsByMonth, replacer));
+
       this.event = {
         description: null,
         date: this.event.date,
@@ -174,6 +183,7 @@ export default {
       let eventToEdit = events.find(element => element == event);
       eventToEdit = event;
       this.editingEvent = null;
+      saveState('schedule', JSON.stringify(this.eventsByMonth, replacer));
       return eventToEdit;
 
     },
@@ -190,12 +200,11 @@ export default {
 
       index = this.allEvents.findIndex(element => element == event);
       this.allEvents.splice(index, 1);
+      saveState('schedule', JSON.stringify(this.eventsByMonth, replacer));
 
     },
 
     cancelEdit(event, index, cancel = false){
-
-
 
       if(cancel == false){
         this.eventToEdit = Object.assign({}, event);
@@ -216,15 +225,35 @@ export default {
   },
 
   created() {
-    if (this.eventsByMonth == null) {
-      this.eventsByMonth = new Map();
-    }
 
-    if (this.eventsByYear == null) {
-      this.eventsByYear = new Map();
-    }
+    this.eventsByMonth = new Map();
+    let state = loadState('schedule');
+    this.eventsByMonth = JSON.parse(state, reviver);
+
+    console.log("This event", this.event);
 
     this.event.date = new Date();
+
+    console.log("This event", this.event);
+    let date = new Date();
+    let today = date.getDate();
+    let month = this.event.date.getMonth();
+
+    let todayEvents = this.eventsByMonth.get(month).get(today);
+    this.shownEvents = todayEvents;
+
+    this.eventsByMonth.forEach(key => {
+      console.log("Key => ", key );
+      key.forEach(innerKey => {
+        console.log("Inner Key => ", innerKey);
+        innerKey.forEach(elem => {
+          console.log(elem);
+          elem.date = new Date(elem.date);
+          this.allEvents.push(elem);
+        })
+      })
+    })
+
   },
 
 };
